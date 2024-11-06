@@ -151,7 +151,7 @@ class dbHandler:
                 Booking.IsFerry
             FROM Booking
             INNER JOIN Flights ON Booking.FlightID = Flights.FlightID
-            WHERE Flights.ArrivalDateTime >= '{curTime.strftime('%Y-%m-%d %H:%M:%S')}' AND Flights.ArrivalDateTime <= '{(curTime + datetime.timedelta(minutes=15)).strftime('%Y-%m-%d %H:%M:%S')}'
+            WHERE Flights.ArrivalDateTime >= '{curTime.strftime('%Y-%m-%d %H:%M:%S')}' AND Flights.ArrivalDateTime <= '{(curTime + datetime.timedelta(minutes=15)).strftime('%Y-%m-%d %H:%M:%S')}' AND NOT Booking.IsFerry
         """
 
         cur.execute(query)
@@ -184,9 +184,9 @@ if __name__ == '__main__':
 
         handle.addBooking("123456", "1", 1.1, 1.2, 20, 2, True)
         handle.addBooking("123457", "1", 100, 200, 20, 2, True)
-        handle.addBooking("123482", "2", 300, 203, 20, 2, True)
-        handle.addBooking("123458", "2", 2, 20, 20, 2, True)
-        handle.addBooking("123158", "3", 123, 200, 20, 2, True)
+        handle.addBooking("123482", "2", 300, 203, 20, 2, False)
+        handle.addBooking("123458", "2", 2, 20, 20, 2, False)
+        handle.addBooking("123158", "3", 123, 200, 20, 2, False)
 
         print(handle.getBookings(datetime.datetime.fromisoformat("2024-11-07T15:15:00")))
     except Exception as e:
