@@ -9,7 +9,8 @@ import random
 import hashlib
 import base64
 import datetime
-
+from typing import List, Tuple, Dict, Any
+from collections import defaultdict
 
 class dbHandler:
     # Create and initialize the database
@@ -105,23 +106,91 @@ class dbHandler:
         conn.commit()
         conn.close()
     
-    def addBooking(customerID: str, flightID: str, baggage: int, rideHail: int, isFerry: bool) -> None:
+    def addBooking(self, customerID: str, flightID: str, cordX: float, cordY:float, baggage: int, rideHail: int, isFerry: bool) -> None:
         conn = sqlite3.connect(self.dbPath)
         cur = conn.cursor()
 
         bookingID = "flight" + str(random.randint(0, 999999999999))
         bookingID = base64.urlsafe_b64encode(hashlib.md5(bookingID.encode('utf-8')).digest())[:16]
 
-        cur.execute(f'INSERT INTO Booking VALUES("{bookingID}", "{customerID}", "{flightID}", {baggage}, {rideHail}, {isFerry});')
-
+        cur.execute(f'INSERT INTO Booking VALUES("{bookingID}", "{customerID}", "{flightID}", {cordX}, {cordY}, {baggage}, {rideHail}, {isFerry});')
 
         conn.commit()
         conn.close()
     
+    def addCustomer(self, customerID: str) -> None:
+        conn = sqlite3.connect(self.dbPath)
+        cur = conn.cursor()
+
+        cur.execute(f'INSERT INTO Customers VALUES("{customerID}");')
+
+        conn.commit()
+        conn.close()
+    
+    def addFlight(self, flightID: str, dt1: datetime, dt2: datetime, departure: str, arrival: str) -> None:
+        conn = sqlite3.connect(self.dbPath)
+        cur = conn.cursor()
+
+        cur.execute(f'INSERT INTO Flights VALUES("{flightID}", "{dt1}", "{dt2}", "{departure}", "{arrival}");')
+
+        conn.commit()
+        conn.close()
+    
+    def getBookings(self, curTime: datetime) -> Dict[str, List]:
+        conn = sqlite3.connect(self.dbPath)
+        cur = conn.cursor()
+
+        query = f"""
+            SELECT
+                Flights.ArrivalAirport,
+                Booking.CustomerID,
+                Booking.CordX,
+                Booking.CordY,
+                Booking.Baggage,
+                Booking.RideHailers,
+                Booking.IsFerry
+            FROM Booking
+            INNER JOIN Flights ON Booking.FlightID = Flights.FlightID
+            WHERE Flights.ArrivalDateTime >= '{curTime.strftime('%Y-%m-%d %H:%M:%S')}' AND Flights.ArrivalDateTime <= '{(curTime + datetime.timedelta(minutes=15)).strftime('%Y-%m-%d %H:%M:%S')}'
+        """
+
+        cur.execute(query)
+        res = cur.fetchall()
+        conn.commit()
+        conn.close()
+
+        result = defaultdict(list)
+        for row in res:
+            result[row[0]].append(row[1:])
+        return result
+    
 
 if __name__ == '__main__':
     handle = dbHandler()
-    handle.addRandomFlight()
-    handle.addRandomCustomer()
-    handle.dropDB()
+    # handle.addRandomFlight()
+    # handle.addRandomCustomer()
+
+    try:
+        handle.addCustomer("123456")
+        handle.addCustomer("123457")
+        handle.addCustomer("123458")
+        handle.addCustomer("123482")
+        handle.addCustomer("123158")
+
+        handle.addFlight("1", datetime.datetime.fromisoformat("2024-11-07T13:00:00"), datetime.datetime.fromisoformat("2024-11-07T15:00:00"), "A", "D")
+        handle.addFlight("2", datetime.datetime.fromisoformat("2024-11-07T14:00:00"), datetime.datetime.fromisoformat("2024-11-07T15:15:00"), "B", "E")
+        handle.addFlight("3", datetime.datetime.fromisoformat("2024-11-07T10:00:00"), datetime.datetime.fromisoformat("2024-11-07T15:30:00"), "C", "F")
+
+
+        handle.addBooking("123456", "1", 1.1, 1.2, 20, 2, True)
+        handle.addBooking("123457", "1", 100, 200, 20, 2, True)
+        handle.addBooking("123482", "2", 300, 203, 20, 2, True)
+        handle.addBooking("123458", "2", 2, 20, 20, 2, True)
+        handle.addBooking("123158", "3", 123, 200, 20, 2, True)
+
+        print(handle.getBookings(datetime.datetime.fromisoformat("2024-11-07T15:15:00")))
+    except Exception as e:
+        print(e)
+    finally:
+        handle.dropDB()
 
