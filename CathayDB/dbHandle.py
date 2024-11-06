@@ -167,8 +167,8 @@ class dbHandler:
 
 if __name__ == '__main__':
     handle = dbHandler()
-    # handle.addRandomFlight()
-    # handle.addRandomCustomer()
+    handle.addRandomFlight()
+    handle.addRandomCustomer()
 
     try:
         handle.addCustomer("123456")
