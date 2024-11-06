@@ -13,7 +13,7 @@
         name = "default";
         buildInputs = with pkgs; [
           pkgs.python3
-          (pkgs.python3.withPackages(ps: with ps; [ requests flask ]))
+          (pkgs.python3.withPackages(ps: with ps; [ requests flask numpy ]))
         ];
       };
     };
