@@ -6,11 +6,12 @@ Provides encapsulation over Cathay and associated flights
 from typing import List, Dict
 import hashlib
 from customers import Customer
+from dbHandle import dbHandler
 
 
 class Flights:
-    def __init__():
-        pass
+    def __init__(self, flightID: str):
+        self.flightID = flightID
 
     '''
     This function provides an abstraction over the actual booking into Cathay database
@@ -18,10 +19,7 @@ class Flights:
 
     TODO: Add seat preferences
     '''
-    def book_flight(customer: Customer, flightID: str, transitID: str) -> str:
-        pass
+    def book_flight(customer: Customer, dest: (float, float), baggage: int, rideHail: int, isFerry:bool) -> str:
+        handler = dbHandler()
+        handler.addBooking(customer.customerID, self.flightID, dest[0], dest[1], baggage, rideHail, isFerry)
 
-    '''
-    Customer Grouping
-    '''
-    

@@ -62,10 +62,3 @@ class Grouping:
                 curSum += baggage[selected[moveIdx]]
             return selected
             
-    
-
-
-
-        
-
-
